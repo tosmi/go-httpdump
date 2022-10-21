@@ -1,0 +1,51 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpdump
+  labels:
+    app: httpdump
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpdump
+  template:
+    metadata:
+      labels:
+        app: httpdump
+    spec:
+      containers:
+      - name: httpdump
+        image: quay.io/tosmi/httpdump:latest
+        ports:
+        - containerPort: 8090
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpdump
+  labels:
+    app: httpdump
+spec:
+  selector:
+    app: httpdump
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: httpdump
+  labels:
+    app: httpdump
+spec:
+  port:
+    targetPort: 8090
+  to:
+    kind: Service
+    name: httpdump
+    weight: 100
+  wildcardPolicy: None
